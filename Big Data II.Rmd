@@ -1,0 +1,139 @@
+---
+title: "Big Data II Assignment"
+author: "Steven Ndung'u"
+date: "9 February 2018"
+output: pdf_document
+---
+
+```{r}
+
+library(dummies)
+library(dplyr)
+library(factoextra)
+library(FactoMineR)
+library(factoextra)
+library(FactoInvestigate)
+
+setwd("F:\\AIMS\\Review  Block\\Block 4\\Big Data II ML and DS\\Big Data II")
+german_credit <- read.csv("german_credit.csv")
+#str(german_credit)
+names(german_credit)
+numeric_var <- c("Duration.of.Credit..month.","Credit.Amount","Age..years.")
+
+ #Normalize numeric columns
+
+normalize <- function(x){
+   (x - mean(x))/sd(x)
+ }
+german_credit[numeric_var] <- lapply(german_credit[numeric_var],normalize)
+
+factor_var <- setdiff(names(german_credit),numeric_var) 
+german_credit[factor_var] <- lapply(german_credit[factor_var],factor)
+
+ 
+
+german_credit_clean <- german_credit[,-22]
+
+#Check variable data types
+#sapply(german_credit, class)
+```
+
+
+# Check for missing values.
+
+There are no missing values in this data set.
+
+```{r}
+#colSums(is.na(german_credit_clean))
+```
+
+
+Factor Analysis for Mixed Data (FAMD)
+
+FAMD is a principal component method dedicated to explore data with both continuous and categorical variables.
+
+```{r}
+res <- FAMD(german_credit_clean,graph = F,ncp = 73)
+fviz_screeplot(res,addlabels = F,ylim = c(0, 8),ncp = 73) +
+ theme(axis.text.x = element_text(size = 9, angle = 45))
+```
+
+From the plot above we can see that the first 51 variables explains  97.918% the whole data set.
+
+```{r}
+fviz_famd_var(res)
+```
+
+All the variables are positevly correlated.
+
+From Factor Analysis for Mixed Data (FAMD) we have reduced our variables from 73 to 51 varibles with lose of 2.082 % of the information only.
+
+```{r}
+res_sig_comp_df <- data.frame(res$ind$coord[,1:51]) 
+dim(res_sig_comp_df)
+head(res_sig_comp_df[,1:4])
+```
+
+
+
+K-MEANS ClUSTERING
+
+We first begin by converting the factor variables to du
+
+```{r}
+#german_credit_dummy <- dummy.data.frame(select_if(german_credit_clean,is.factor))
+german_credit_all_numeric <- dummy.data.frame(german_credit_clean,dummy.classes = "factor")
+```
+
+
+```{r}
+german_credit_all_numeric <- data.frame(scale(german_credit_all_numeric))
+pc <- PCA(german_credit_all_numeric,graph = F,ncp = 43)
+new_vars <- data.frame(pc$ind$coord)
+```
+
+
+Estimating the optimal number of clusters
+
+```{r}
+
+pc <- kmeans(new_vars, centers = 5, iter.max = 10, nstart = 25)
+library(factoextra)
+fviz_nbclust(german_credit_all_numeric, kmeans, method = "wss") +
+    geom_vline(xintercept = 4, linetype = 2)
+```
+
+
+As k-means clustering algorithm starts with k randomly selected centroids.
+
+The R code below performs k-means clustering with k = 3. This is the best choice of clusters after testing several times with k about 4:
+
+```{r}
+
+
+km.res <- kmeans(german_credit_all_numeric, centers = 3, nstart = 50)
+
+#fviz_screeplot(pc$var, choice = "var", axes = 1, top = 42,addlabels = T)
+#fviz_contrib(pc, choice = "var", axes = 2, top = 43)
+```
+
+Now, computing the mean of each variables by clusters using the original data:
+
+```{r}
+aggregate(german_credit_all_numeric, by = list(cluster=km.res$cluster), mean)
+```
+
+
+```{r}
+fviz_cluster(km.res, data = german_credit_all_numeric,
+             palette = c("blue","red","yellow"), 
+             ellipse.type = "euclid", # Concentration ellipse
+             star.plot = TRUE, # Add segments from centroids to items
+             repel = TRUE, # Avoid label overplotting (slow)
+             ggtheme = theme_minimal()
+             )
+```
+
+![](BigData1.PNG)
+
+
