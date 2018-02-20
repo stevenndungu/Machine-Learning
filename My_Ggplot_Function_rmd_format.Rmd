@@ -1,9 +1,11 @@
----
-title: "Ggplot functions"
-author: "Steven Ndung'u"
-date: "29 January 2018"
-output: pdf_document
----
+---  
+  title: "GGPLOT2 PLOTS"  
+author: "Steven Ndung'u"  
+date: "`r format(Sys.Date())`"
+output:  
+  github_document:  
+  keep_md: true  
+---  
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
