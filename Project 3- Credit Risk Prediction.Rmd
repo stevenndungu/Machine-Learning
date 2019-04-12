@@ -1,5 +1,5 @@
 ---
-title: "Big Data II Assignment"
+title: "Project 3"
 author: "Steven Ndung'u"
 date: "9 February 2018"
 output: pdf_document
@@ -14,7 +14,7 @@ library(FactoMineR)
 library(factoextra)
 library(FactoInvestigate)
 
-setwd("F:\\AIMS\\Review  Block\\Block 4\\Big Data II ML and DS\\Big Data II")
+#setwd("F:\\AIMS\\Review  Block\\Block 4\\Big Data II ML and DS\\Big Data II")
 german_credit <- read.csv("german_credit.csv")
 #str(german_credit)
 names(german_credit)
